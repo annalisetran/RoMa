@@ -867,6 +867,7 @@ class RegressionMatcher(nn.Module):
         finest_corresps = corresps[finest_scale]
         del corresps
         torch.cuda.empty_cache()
+        hs, ws = finest_corresps["flow"].shape[-2:]
         if self.upsample_preds and im_A_high_res is None and im_B_high_res is None:
             torch.cuda.empty_cache()
             test_transform = get_tuple_transform_ops(resize=(hs, ws), normalize=True)
@@ -906,6 +907,13 @@ class RegressionMatcher(nn.Module):
                 )
 
         im_A_to_im_B = finest_corresps["flow"]
+        if self.attenuate_cert:
+            low_res_certainty = F.interpolate(
+                low_res_certainty,
+                size=finest_corresps["certainty"].shape[-2:],
+                align_corners=False,
+                mode="bilinear",
+            )
         certainty = finest_corresps["certainty"] - (
             low_res_certainty if self.attenuate_cert else 0
         )
