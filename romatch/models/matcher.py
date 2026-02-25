@@ -905,7 +905,7 @@ class RegressionMatcher(nn.Module):
                     batch, batched=True, upsample=True, scale_factor=scale_factor
                 )
 
-        im_A_to_im_B = finest_corresps[finest_scale]["flow"]
+        im_A_to_im_B = finest_corresps["flow"]
         certainty = finest_corresps["certainty"] - (
             low_res_certainty if self.attenuate_cert else 0
         )
