@@ -597,7 +597,7 @@ class RegressionMatcher(nn.Module):
                 for scale in feature_pyramid0
             }
             return feature_pyramid
-            
+
         x_q = batch["im_A"]
         x_s = batch["im_B"]
         if batched:
@@ -786,7 +786,7 @@ class RegressionMatcher(nn.Module):
                 return torch.cat((inds_A, inds_B), dim=-1)
             else:
                 return torch.cat((x_A[inds_A], x_B[inds_B]), dim=-1)
-    
+
     def _get_device(self):
         # let's hope this is same for all weights
         return self.encoder.cnn.layers[0].weight.device
@@ -865,6 +865,8 @@ class RegressionMatcher(nn.Module):
             )
 
         finest_corresps = corresps[finest_scale]
+        del corresps
+        torch.cuda.empty_cache()
         if self.upsample_preds and im_A_high_res is None and im_B_high_res is None:
             torch.cuda.empty_cache()
             test_transform = get_tuple_transform_ops(resize=(hs, ws), normalize=True)
@@ -881,7 +883,7 @@ class RegressionMatcher(nn.Module):
                 im_A, im_B = test_transform((im_A_input, im_B_input))
 
             im_A, im_B = im_A[None].to(device), im_B[None].to(device)
-            
+
             batch = {"im_A": im_A, "im_B": im_B, "corresps": finest_corresps}
         elif self.upsample_preds and im_A_high_res is not None and im_B_high_res is not None:
             batch = {"im_A": im_A_high_res, "im_B": im_B_high_res, "corresps": finest_corresps}
